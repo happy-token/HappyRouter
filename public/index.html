@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy App Router</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  height: 100vh;
+  display: flex; flex-direction: column;
+}
+header {
+  background: #fff; border-bottom: 1px solid #e5e5e7;
+  padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+}
+header h1 { font-size: 18px; font-weight: 600; }
+.badge { font-size: 12px; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+.badge-ok { background: #e8f5e9; color: #2e7d32; }
+.badge-warn { background: #fff3e0; color: #e65100; }
+.badge-off { background: #f5f5f5; color: #999; }
+
+main { flex: 1; display: flex; overflow: hidden; }
+.panel {
+  background: #fff; border-right: 1px solid #e5e5e7;
+  display: flex; flex-direction: column;
+}
+.panel-apps { width: 340px; }
+.panel-proxy { flex: 1; }
+.panel-result { width: 360px; border-right: none; border-left: 1px solid #e5e5e7; }
+
+.panel-header {
+  padding: 16px; border-bottom: 1px solid #e5e5e7;
+  font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .5px;
+}
+.search-box { padding: 12px 16px; border-bottom: 1px solid #e5e5e7; }
+.search-box input {
+  width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 14px; outline: none; transition: border-color .15s;
+}
+.search-box input:focus { border-color: #007aff; }
+
+.list { flex: 1; overflow-y: auto; }
+.item {
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px;
+  transition: background .1s;
+}
+.item:hover { background: #f5f5f7; }
+.item.selected { background: #e8f0fe; color: #007aff; font-weight: 500; }
+.item-icon { width: 32px; height: 32px; border-radius: 8px; background: #e5e5e7; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.item-info { flex: 1; min-width: 0; }
+.item-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-sub { font-size: 12px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-delay { font-size: 12px; color: #2e7d32; font-weight: 500; flex-shrink: 0; }
+.item-delay-slow { color: #e65100; }
+.item-delay-dead { color: #999; }
+
+.result-section { padding: 16px; border-bottom: 1px solid #e5e5e7; }
+.result-section h3 { font-size: 13px; font-weight: 600; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+.selected-app { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 14px; }
+.selected-app .item-icon { width: 24px; height: 24px; font-size: 12px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; background: #e8f0fe; color: #007aff; margin: 2px; }
+
+.mode-group { display: flex; gap: 8px; }
+.mode-btn {
+  flex: 1; padding: 10px; border: 2px solid #e5e5e7; border-radius: 10px;
+  background: #fff; cursor: pointer; font-size: 13px; text-align: center; transition: all .15s;
+}
+.mode-btn:hover { border-color: #007aff; }
+.mode-btn.active { border-color: #007aff; background: #e8f0fe; color: #007aff; font-weight: 600; }
+.mode-btn small { display: block; font-weight: 400; color: #999; margin-top: 2px; }
+
+.preview-box {
+  margin: 16px; padding: 12px; background: #1d1d1f; color: #6ee7b7;
+  border-radius: 10px; font-family: "SF Mono", Monaco, monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; flex: 1; overflow-y: auto;
+}
+
+.actions { padding: 16px; border-top: 1px solid #e5e5e7; }
+.btn {
+  width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 15px;
+  font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.btn-primary { background: #007aff; color: #fff; }
+.btn-primary:hover { background: #0062cc; }
+.btn-secondary { background: #f5f5f7; color: #1d1d1f; margin-top: 8px; }
+.btn-secondary:hover { background: #e5e5e7; }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 500;
+  background: #1d1d1f; color: #fff; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  animation: fadeIn .2s;
+}
+.toast-ok { background: #2e7d32; }
+.toast-err { background: #c62828; }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
+
+.empty { padding: 32px 16px; text-align: center; color: #999; font-size: 14px; }
+
+.two-col { display: flex; gap: 8px; }
+.two-col > * { flex: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Happy App Router</h1>
+  <div>
+    <span id="tunBadge" class="badge badge-off">检查中...</span>
+    &nbsp;
+    <span id="delayBadge" class="badge badge-off">---</span>
+  </div>
+</header>
+
+<main>
+  <!-- App Panel -->
+  <div class="panel panel-apps">
+    <div class="panel-header">应用列表</div>
+    <div class="search-box">
+      <input id="appSearch" type="text" placeholder="搜索应用名称..." autofocus>
+    </div>
+    <div id="appList" class="list"></div>
+  </div>
+
+  <!-- Proxy Panel -->
+  <div class="panel panel-proxy">
+    <div class="panel-header">代理组 / 节点</div>
+    <div class="search-box">
+      <input id="proxySearch" type="text" placeholder="搜索节点 (e.g. 日本, 香港)...">
+    </div>
+    <div id="proxyList" class="list"></div>
+  </div>
+
+  <!-- Result Panel -->
+  <div class="panel panel-result">
+    <div class="panel-header">当前配置</div>
+    <div class="result-section" id="selectedApp"></div>
+    <div class="result-section" id="selectedProxy"></div>
+    <div class="result-section" id="modeSection"></div>
+    <div class="preview-box" id="preview"></div>
+    <div class="actions">
+      <button class="btn btn-primary" id="applyBtn" disabled>选择应用和节点以继续</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+let state = {
+  apps: [],
+  proxyOpts: [],
+  selApp: null,
+  selProxy: null,
+  mode: "prepend",
+  delays: {},
+  tunMode: false,
+};
+
+// Fetch apps
+async function loadApps(q) {
+  const resp = await fetch(`/api/apps?q=${encodeURIComponent(q || "")}`);
+  state.apps = await resp.json();
+  renderAppList();
+}
+
+// Fetch proxies and delays
+async function loadProxies(q) {
+  const resp = await fetch(`/api/proxies?q=${encodeURIComponent(q || "")}`);
+  const data = await resp.json();
+  state.proxyOpts = data.options;
+  state.delays = data;
+  state.tunMode = data.tunMode;
+
+  // Update badges
+  const tunBadge = $("#tunBadge");
+  tunBadge.textContent = data.tunMode ? "TUN 已开启" : "TUN 未开";
+  tunBadge.className = `badge ${data.tunMode ? "badge-ok" : "badge-warn"}`;
+
+  const delayBadge = $("#delayBadge");
+  if (data.delaysTotal > 0) {
+    delayBadge.textContent = `延迟: ${data.delaysCount}/${data.delaysTotal}`;
+    delayBadge.className = "badge badge-ok";
+  } else {
+    delayBadge.textContent = "延迟: 无数据";
+    delayBadge.className = "badge badge-off";
+  }
+
+  renderProxyList();
+}
+
+function renderAppList() {
+  const el = $("#appList");
+  if (!state.apps.length) {
+    el.innerHTML = '<div class="empty">没有匹配的应用</div>';
+    return;
+  }
+  el.innerHTML = state.apps
+    .map(
+      (a, i) => `
+    <div class="item ${state.selApp?.path === a.path ? "selected" : ""}" data-idx="${i}">
+      <div class="item-icon">📦</div>
+      <div class="item-info">
+        <div class="item-name">${esc(a.name)}</div>
+        <div class="item-sub">${esc(a.bundleId || a.path)}</div>
+      </div>
+    </div>`
+    )
+    .join("");
+
+  el.querySelectorAll(".item").forEach((div) => {
+    div.addEventListener("click", () => {
+      state.selApp = state.apps[parseInt(div.dataset.idx)];
+      renderAppList();
+      updateResult();
+    });
+  });
+}
+
+function renderProxyList() {
+  const el = $("#proxyList");
+  if (!state.proxyOpts.length) {
+    el.innerHTML = '<div class="empty">没有匹配的节点/组</div>';
+    return;
+  }
+  el.innerHTML = state.proxyOpts
+    .map(
+      (o, i) => `
+    <div class="item ${state.selProxy?.value === o.value ? "selected" : ""}" data-idx="${i}">
+      <div class="item-icon">${o.type === "group" ? "📁" : o.type === "direct" ? "➡️" : "🔗"}</div>
+      <div class="item-info">
+        <div class="item-name">${esc(o.label)}</div>
+      </div>
+      ${
+        o.delay !== undefined
+          ? `<div class="item-delay ${o.delay > 1000 ? "item-delay-slow" : ""} ${o.delay === 0 ? "item-delay-dead" : ""}">${formatDelay(o.delay)}</div>`
+          : ""
+      }
+    </div>`
+    )
+    .join("");
+
+  el.querySelectorAll(".item").forEach((div) => {
+    div.addEventListener("click", () => {
+      state.selProxy = state.proxyOpts[parseInt(div.dataset.idx)];
+      renderProxyList();
+      updateResult();
+    });
+  });
+}
+
+function updateResult() {
+  const appDiv = $("#selectedApp");
+  const proxyDiv = $("#selectedProxy");
+  const modeDiv = $("#modeSection");
+  const preview = $("#preview");
+  const btn = $("#applyBtn");
+
+  if (state.selApp) {
+    appDiv.innerHTML = `<h3>已选应用</h3>
+      <div class="selected-app"><div class="item-icon">📦</div><div><strong>${esc(state.selApp.name)}</strong><br><span style="font-size:12px;color:#999">${esc(state.selApp.bundleId || state.selApp.path)}</span></div></div>`;
+  } else {
+    appDiv.innerHTML = `<h3>已选应用</h3><div class="empty" style="padding:8px 0">点击左侧应用选择</div>`;
+  }
+
+  if (state.selProxy) {
+    proxyDiv.innerHTML = `<h3>已选代理</h3><div class="tag">${esc(state.selProxy.label)}</div>`;
+  } else {
+    proxyDiv.innerHTML = `<h3>已选代理</h3><div class="empty" style="padding:8px 0">点击列表选择代理</div>`;
+  }
+
+  modeDiv.innerHTML = `<h3>路由模式</h3>
+    <div class="mode-group">
+      <div class="mode-btn ${state.mode === "prepend" ? "active" : ""}" data-mode="prepend">
+        追加规则<small>App→代理，其他不变</small>
+      </div>
+      <div class="mode-btn ${state.mode === "selected_only" ? "active" : ""}" data-mode="selected_only">
+        仅选中直连<small>App→代理，其他→直连</small>
+      </div>
+    </div>`;
+  modeDiv.querySelectorAll(".mode-btn").forEach((b) => {
+    b.addEventListener("click", () => {
+      state.mode = b.dataset.mode;
+      updateResult();
+    });
+  });
+
+  if (state.selApp && state.selProxy) {
+    const rules = genRules(state.selApp, state.selProxy.value);
+    const extra = state.mode === "selected_only" ? "MATCH,DIRECT" : "";
+    preview.textContent = [rules[0], rules[1] || "", extra].filter(Boolean).join("\n");
+    btn.textContent = `应用规则`;
+    btn.disabled = false;
+    if (!state.tunMode) {
+      preview.textContent =
+        "⚠ TUN 模式未开启！\nPROCESS 规则只在 TUN 模式下生效。\n请先在 Clash Verge Rev 设置中开启 TUN 模式。\n\n" +
+        preview.textContent;
+    }
+  } else {
+    preview.textContent = "选择应用和代理节点后预览规则";
+    btn.textContent = "选择应用和节点以继续";
+    btn.disabled = true;
+  }
+
+  // Re-bind apply
+  btn.onclick = applyRules;
+}
+
+function genRules(app, proxy) {
+  const escaped = app.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "/.*";
+  const rules = [`PROCESS-PATH-REGEX,^${escaped},${proxy}`];
+  if (app.executable) rules.push(`PROCESS-NAME,${app.executable},${proxy}`);
+  return rules;
+}
+
+async function applyRules() {
+  if (!state.selApp || !state.selProxy) return;
+  const btn = $("#applyBtn");
+  btn.disabled = true;
+  btn.textContent = "应用规则...";
+
+  try {
+    const resp = await fetch("/api/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        app: state.selApp,
+        proxy: state.selProxy.value,
+        mode: state.mode,
+      }),
+    });
+    const result = await resp.json();
+    if (result.error) {
+      toast(result.error, "err");
+    } else {
+      toast(`规则已应用${result.reloaded ? "并热重载" : ""}。${result.bak ? "已备份。" : ""}`, "ok");
+    }
+  } catch (e) {
+    toast("应用失败: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "应用规则";
+  }
+}
+
+function toast(msg, type) {
+  const t = document.createElement("div");
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+function formatDelay(ms) {
+  if (ms === 0) return "---";
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+// Init
+$("#appSearch").addEventListener("input", (e) => loadApps(e.target.value));
+$("#proxySearch").addEventListener("input", (e) => loadProxies(e.target.value));
+
+loadApps("");
+loadProxies("");
+</script>
+</body>
+</html>

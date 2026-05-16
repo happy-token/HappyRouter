@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+*.js.bak-*
+node_modules/
+*.yaml.bak-*
+dist/

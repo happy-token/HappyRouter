@@ -1,0 +1,51 @@
+{
+  "name": "@yourname/happy-router",
+  "version": "1.0.0",
+  "description": "Per-app proxy routing for Clash Verge Rev on macOS",
+  "type": "module",
+  "bin": {
+    "happy-router": "./cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "electron.js",
+  "scripts": {
+    "start": "node cli.js",
+    "server": "node server.js",
+    "electron": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.happyrouter.app",
+    "productName": "Happy Router",
+    "mac": {
+      "category": "public.app-category.utilities",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        }
+      ]
+    },
+    "files": [
+      "server.js",
+      "cli.js",
+      "electron.js",
+      "lib/**",
+      "public/**",
+      "node_modules/**"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "js-yaml": "^4.1.0",
+    "simple-plist": "^1.4.0"
+  },
+  "devDependencies": {
+    "electron": "^42.1.0",
+    "electron-builder": "^26.8.1"
+  }
+}
