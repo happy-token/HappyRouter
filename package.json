@@ -18,6 +18,7 @@
     "dist:mac": "electron-builder --mac"
   },
   "build": {
+    "publish": null,
     "appId": "com.happyrouter.app",
     "productName": "Happy Router",
     "mac": {
