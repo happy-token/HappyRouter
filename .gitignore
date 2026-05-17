@@ -5,3 +5,5 @@ __pycache__/
 node_modules/
 *.yaml.bak-*
 dist/
+assets/dev-id.p12
+.env

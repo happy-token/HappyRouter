@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  build-mac:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,10 +21,26 @@ jobs:
 
       - run: npm ci
 
+      - name: Prepare signing certificate
+        id: cert
+        run: |
+          echo "$CSC_LINK_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          echo "path=$RUNNER_TEMP/cert.p12" >> "$GITHUB_OUTPUT"
+        env:
+          CSC_LINK_BASE64: ${{ secrets.CSC_LINK }}
+
       - name: Build macOS DMG
         run: npm run dist:mac
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_LINK: ${{ steps.cert.outputs.path }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Clean up certificate
+        if: always()
+        run: rm -f "$RUNNER_TEMP/cert.p12"
 
       - name: Upload DMG to Release
         uses: softprops/action-gh-release@v2
