@@ -1,120 +1,98 @@
 # Happy App Router
 
-Per-app proxy routing for Clash Verge Rev on macOS. Select apps, assign proxy policies, generate rules — no manual YAML editing.
+Per-app proxy routing for Clash Verge Rev on macOS. Web UI to select apps, assign proxy policies, and apply rules with one click.
 
 ## Prerequisites
 
-- macOS with Clash Verge Rev installed and TUN mode enabled
-- Python 3.11+ (already installed on macOS)
+- macOS with [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) installed
+- TUN mode enabled (required for per-process rules)
+- Node.js 22+
 
 ## Quick Start
 
 ```bash
-# One-liner — venv auto-creates on first run
-./run.sh
+# CLI mode — opens browser automatically
+npx happy-router
 
-# Or run directly (zero external dependencies)
-python3 happy-router.py
+# Desktop app — native macOS window
+npm run electron
+
+# Web only — visit http://localhost:3456
+npm start
 ```
 
 ## Usage
 
-The script runs interactively in 4 steps:
+1. **Pick an app** — search in the left panel, click to select
+2. **Pick a proxy** — choose a proxy group or individual node (with live latency)
+3. **Choose mode** — prepend rules or selected-only (all others go DIRECT)
+4. **Apply** — writes rules to clash-verge.yaml, hot-reloads via API
 
-```
-=== Happy App Router (CLI) ===
-
-Found 87 apps.
-
-Search app name (or Enter to list all): codex
-  [0] Codex  (com.blacktree.Codex)
-  [1] Codex Helper  (...)
-Select app: 0
-
-Found 5 proxy options.
-
-  [0] 🔰节点选择
-  [1] 🎯全球直连
-  [2] 🚀国际媒体
-  [3] REJECT
-  [4] DIRECT
-Select proxy group: 0
-
-  [0] prepend — app -> proxy, other traffic -> original rules
-  [1] selected_only — app -> proxy, other traffic -> DIRECT
-Select mode [0/1]: 0
-
-=== Generated Rules ===
-  PROCESS-PATH-REGEX,^/Applications/Codex\.app/.*,🔰节点选择
-  PROCESS-NAME,Codex,🔰节点选择
-
-Apply? [y/N] y
-Backup: .../happy-router.js.bak-20260516-203000
-Written: .../scripts/happy-router.js
-Done. Click 'Reload Profile' in Clash Verge Rev.
-```
-
-### Step by step
-
-| Step | What you do |
-|------|-------------|
-| 1. Search | Type part of an app name (e.g. `codex`, `chrome`, `cursor`), or Enter to see all |
-| 2. Pick app | Enter the number next to the app |
-| 3. Pick proxy | Choose a proxy group from your Clash config, or `DIRECT` |
-| 4. Choose mode | `0` = only selected apps use proxy, others follow existing rules. `1` = selected apps use proxy, everything else goes DIRECT |
-| 5. Confirm | `y` to write config, anything else to cancel |
+Rules take effect immediately. No manual config editing needed.
 
 ## Routing Modes
 
-### Mode 0 — Prepend
+| Mode | Behavior |
+|------|----------|
+| Prepend | Selected apps → proxy, other traffic → original Clash rules |
+| Selected Only | Selected apps → proxy, other traffic → DIRECT |
 
-Selected apps route through the chosen proxy group. All other traffic follows your existing Clash rules unchanged.
-
-```
-selected apps  ->  chosen proxy
-everything else ->  original rules (as before)
-```
-
-### Mode 1 — Selected Only
-
-Selected apps route through the chosen proxy group. Everything else bypasses proxy entirely (`DIRECT`).
-
-```
-selected apps  ->  chosen proxy
-everything else ->  DIRECT
-```
-
-## What It Does
-
-1. Scans `/Applications` and `~/Applications` for `.app` bundles
-2. Reads the proxy groups from `clash-verge.yaml`
-3. Generates two rules per app:
-   - `PROCESS-PATH-REGEX` — matches all processes under the app bundle (catches helpers too)
-   - `PROCESS-NAME` — matches by executable name
-4. Writes to `~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev/scripts/happy-router.js`
-5. Creates a timestamped backup before overwriting
-
-## Rollback
-
-Backup files are saved alongside the script:
-
-```
-scripts/
-├── happy-router.js
-├── happy-router.js.bak-20260516-203000
-└── happy-router.js.bak-20260515-091500
-```
-
-To roll back, copy the backup over `happy-router.js` and reload the profile:
+## Development
 
 ```bash
-cp ~/Library/Application\ Support/io.github.clash-verge-rev.clash-verge-rev/scripts/happy-router.js.bak-* \
-   ~/Library/Application\ Support/io.github.clash-verge-rev.clash-verge-rev/scripts/happy-router.js
+npm install
+npm start          # Web mode
+npm run electron   # Desktop mode
+npm run dist:mac   # Package signed DMG
 ```
 
-## Important Notes
+## Release
 
-- **TUN mode must be enabled** in Clash Verge Rev — `PROCESS-NAME` and `PROCESS-PATH-REGEX` rules only work in TUN mode
-- After applying rules, click **Reload Profile** in Clash Verge Rev to take effect
-- The script only touches `happy-router.js` — it never modifies your subscription files or main config
-- No sudo required, no system permission changes
+### Local build (signed + notarized DMG)
+
+```bash
+source .env && npm run dist:mac
+```
+
+### CI auto-build (GitHub Actions)
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+Pushing a tag triggers GitHub Actions to build a signed + notarized DMG and publish it to the [Releases](https://github.com/happy-token/HappyRouter/releases) page.
+
+### npm publish
+
+```bash
+npm login --registry https://registry.npmjs.org --auth-type=web
+npm publish --access public --registry https://registry.npmjs.org
+```
+
+Then anyone can run: `npx @yourname/happy-router`
+
+## Signing & Notarization
+
+Uses the shared config scripts at `~/workspace/config/scripts/`:
+
+```bash
+# One-time setup
+~/workspace/config/scripts/setup-env.sh /path/to/HappyRouter
+~/workspace/config/scripts/setup-github-secrets.sh owner/repo .env
+
+# Local build
+source .env && npm run dist:mac
+```
+
+Requires an Apple Developer account and Developer ID Application certificate in Keychain.
+
+## Important
+
+- **TUN mode must be enabled** — PROCESS-NAME and PROCESS-PATH-REGEX rules only work in TUN mode
+- Before applying, a backup of `clash-verge.yaml` is always created
+- Rules are wrapped in `# BEGIN/END HAPPY_APP_ROUTER` markers for safe removal
+- No sudo required, system config is never modified
+
+## License
+
+MIT
