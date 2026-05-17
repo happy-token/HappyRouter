@@ -1,0 +1,21 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Combined Masterpiece: Scheme B Design + Scheme A Background -->
+  <rect width="120" height="120" rx="32" fill="url(#grad_combined)"/>
+  
+  <!-- The Winking R Motif -->
+  <path d="M38 32V88M38 32H64C75 32 80 41 80 52C80 63 75 72 64 72H38M60 72L80 88" 
+        stroke="white" 
+        stroke-width="11" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- The Winking Eye Node -->
+  <circle cx="58" cy="52" r="5.5" fill="white"/>
+
+  <defs>
+    <linearGradient id="grad_combined" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#007AFF"/> <!-- Scheme A Blue Start -->
+      <stop offset="1" stop-color="#00C7FF"/> <!-- Scheme A Cyan End -->
+    </linearGradient>
+  </defs>
+</svg>

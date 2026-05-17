@@ -2,97 +2,98 @@
 
 Per-app proxy routing for Clash Verge Rev on macOS. Web UI to select apps, assign proxy policies, and apply rules with one click.
 
-## Prerequisites
+## 🚀 Install with NPM
 
-- macOS with [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) installed
-- TUN mode enabled (required for per-process rules)
-- Node.js 22+
-
-## Quick Start
+You can now install Happy App Router as a global command:
 
 ```bash
-# CLI mode — opens browser automatically
-npx happy-router
-
-# Desktop app — native macOS window
-npm run electron
-
-# Web only — visit http://localhost:3456
-npm start
+npm install -g @happytokenai/happy-router
 ```
 
-## Usage
+After installation, you can use the command `happy-router` directly from anywhere in your terminal.
 
-1. **Pick an app** — search in the left panel, click to select
-2. **Pick a proxy** — choose a proxy group or individual node (with live latency)
-3. **Choose mode** — prepend rules or selected-only (all others go DIRECT)
-4. **Apply** — writes rules to clash-verge.yaml, hot-reloads via API
+## 🖥️ Usage
 
-Rules take effect immediately. No manual config editing needed.
+Both CLI and Web UI are included and fully functional:
 
-## Routing Modes
+### 1. Web UI (Recommended)
+Launch the beautiful, modern Web interface to manage all your rules visually:
+```bash
+happy-router --web
+```
+*Alternatively, use `npx @happytokenai/happy-router --web` without installing.*
+
+### 2. CLI Interface
+Step-by-step interactive command line guide:
+```bash
+happy-router
+```
+
+## 🛠️ Prerequisites
+
+- macOS with [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) installed
+- **TUN mode enabled** (required for per-process rules)
+- Node.js 22+
+
+## 📖 Key Features
+
+- **Pick an app** — Search and select from all installed macOS applications.
+- **Pick a proxy** — Choose a proxy group or individual node with live latency display.
+- **Modern Design** — High-end UI with transparency effects, icon-only controls, and elegant animations.
+- **One-click Apply** — Writes rules to `clash-verge.yaml` and hot-reloads via API automatically.
+
+## 🚦 Routing Modes
 
 | Mode | Behavior |
 |------|----------|
-| Prepend | Selected apps → proxy, other traffic → original Clash rules |
-| Selected Only | Selected apps → proxy, other traffic → DIRECT |
+| **Append (追加规则)** | Selected apps → proxy, other traffic follows original Clash rules. |
+| **Exclusive (仅选中直连)** | Selected apps → proxy, ALL other traffic goes DIRECT. |
+## 📦 Development & Testing
 
-## Development
+If you want to contribute or test changes locally:
 
-```bash
-npm install
-npm start          # Web mode
-npm run electron   # Desktop mode
-npm run dist:mac   # Package signed DMG
-```
+1. **Clone & Install**:
+   ```bash
+   git clone https://github.com/happytokenai/HappyRouter.git
+   cd HappyRouter
+   npm install
+   ```
 
-## Release
+2. **Local Linking (Development Mode)**:
+   Link the package to your system to test the `happy-router` command globally without publishing:
+   ```bash
+   npm link
+   ```
+   Now, any changes you make in the code will be immediately reflected when you run `happy-router`.
 
-### Local build (signed + notarized DMG)
+3. **Running Interfaces**:
+   - Web UI: `npm run web`
+   - CLI: `npm start`
+   - Desktop: `npm run electron`
 
-```bash
-source .env && npm run dist:mac
-```
+## 🚢 Publishing to NPM
 
-### CI auto-build (GitHub Actions)
+To publish a new version to the NPM registry:
 
-```bash
-git tag v1.0.0 && git push origin v1.0.0
-```
+1. **Login** (if not already):
+   ```bash
+   npm login --registry https://registry.npmjs.org
+   ```
 
-Pushing a tag triggers GitHub Actions to build a signed + notarized DMG and publish it to the [Releases](https://github.com/happy-token/HappyRouter/releases) page.
+2. **Update Version**:
+   Increment the version in `package.json` (e.g., from `1.0.0` to `1.0.1`).
 
-### npm publish
+3. **Publish**:
+   ```bash
+   npm publish --access public
+   ```
 
-```bash
-npm login --registry https://registry.npmjs.org --auth-type=web
-npm publish --access public --registry https://registry.npmjs.org
-```
+## ⚠️ Important
 
-Then anyone can run: `npx @yourname/happy-router`
+- **TUN mode must be enabled** — PROCESS-NAME rules only work in TUN mode.
+- **Auto Backup** — A backup of your `clash-verge.yaml` is created before every change.
+- **Safe Markers** — Rules are wrapped in `# BEGIN/END HAPPY_APP_ROUTER` markers for safe removal.
 
-## Signing & Notarization
-
-Uses the shared config scripts at `~/workspace/config/scripts/`:
-
-```bash
-# One-time setup
-~/workspace/config/scripts/setup-env.sh /path/to/HappyRouter
-~/workspace/config/scripts/setup-github-secrets.sh owner/repo .env
-
-# Local build
-source .env && npm run dist:mac
-```
-
-Requires an Apple Developer account and Developer ID Application certificate in Keychain.
-
-## Important
-
-- **TUN mode must be enabled** — PROCESS-NAME and PROCESS-PATH-REGEX rules only work in TUN mode
-- Before applying, a backup of `clash-verge.yaml` is always created
-- Rules are wrapped in `# BEGIN/END HAPPY_APP_ROUTER` markers for safe removal
-- No sudo required, system config is never modified
-
-## License
+## 📄 License
 
 MIT

@@ -1,0 +1,13 @@
+.github/
+PRD.md
+assets/
+happy-router.py
+requirements.txt
+resources/
+scripts/
+run.sh
+.env
+dist/
+*.bak-*
+__pycache__/
+*.pyc

@@ -1,0 +1,9 @@
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple line "R" for macOS menu bar template icon -->
+  <path d="M12 8V28M12 8H20C24 8 26 11.5 26 15.5C26 19.5 24 23 20 23H12M19 23L26 28"
+        stroke="black"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <circle cx="19" cy="15.5" r="2.5" fill="black"/>
+</svg>
