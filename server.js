@@ -15,6 +15,10 @@ export function createApp() {
   app.use(express.json());
   app.use(express.static(join(__dirname, "public")));
 
+  // Serve account QR images
+  const accountsDir = join(process.env.HOME, "workspace", "document", "accounts");
+  app.use("/api/accounts", express.static(accountsDir));
+
   // App list with icons
   app.get("/api/apps", (_req, res) => {
     const apps = scanApps();
