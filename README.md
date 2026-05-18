@@ -1,6 +1,6 @@
-# Happy App Router
+# Happy Router
 
-Per-app proxy routing for Clash Verge Rev on macOS. Web UI to select apps, assign proxy policies, and apply rules with one click.
+Per-app proxy routing for Clash Verge Rev on macOS. A native desktop app (Electron) with Web UI to select apps, assign proxy policies, and apply rules with one click.
 
 ## 🚀 Install with NPM
 
@@ -29,6 +29,26 @@ Step-by-step interactive command line guide:
 happy-router
 ```
 
+## 🖥️ Desktop App
+
+Happy Router is also available as a native macOS desktop application with a system tray icon. The desktop app runs in the background, accessible from the menu bar at any time.
+
+- **Tray icon** — Quick access to the app from the macOS menu bar
+- **Native look** — macOS-native title bar with vibrancy and glass effects
+- **Persistent** — Keeps running in the tray when the window is closed
+
+### Download
+
+Download the latest `.dmg` from the [Releases](https://github.com/happy-token/HappyRouter/releases) page.
+
+### Build from Source
+
+```bash
+npm run dist:mac
+```
+
+The `.dmg` will be generated in the `dist/` directory.
+
 ## 🛠️ Prerequisites
 
 - macOS with [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) installed
@@ -37,8 +57,11 @@ happy-router
 
 ## 📖 Key Features
 
+- **Desktop App** — Native macOS Electron app with tray icon and vibrancy effects.
 - **Pick an app** — Search and select from all installed macOS applications.
 - **Pick a proxy** — Choose a proxy group or individual node with live latency display.
+- **i18n Support** — Chinese and English interface with one-click language switching.
+- **Theme Switching** — Light, dark, and system-follow theme support.
 - **Modern Design** — High-end UI with transparency effects, icon-only controls, and elegant animations.
 - **One-click Apply** — Writes rules to `clash-verge.yaml` and hot-reloads via API automatically.
 
