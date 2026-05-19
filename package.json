@@ -1,6 +1,6 @@
 {
   "name": "@happytokenai/happy-router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Per-app proxy routing for Clash Verge Rev on macOS",
   "type": "module",
   "bin": {
