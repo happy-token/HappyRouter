@@ -1,6 +1,6 @@
 .github/
 PRD.md
-assets/
+assets/dev-id.p12
 happy-router.py
 requirements.txt
 resources/

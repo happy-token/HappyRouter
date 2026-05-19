@@ -44,7 +44,8 @@
       "cli.js",
       "electron.js",
       "lib/**",
-      "public/**"
+      "public/**",
+      "assets/**"
     ]
   },
   "dependencies": {
